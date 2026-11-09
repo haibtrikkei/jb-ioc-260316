@@ -1,0 +1,37 @@
+
+services:
+  cate-pro-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cate-pro-backend
+    restart: always
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://cate-pro-db:5432/cate_pro_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234$
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      cate-pro-db:
+        condition: service_healthy
+
+  cate-pro-db:
+    image: postgres:17-alpine
+    container_name: cate-pro-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234$
+      POSTGRES_DB: cate_pro_db
+    volumes:
+      - cate-pro-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cate_pro_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cate-pro-db-data:
